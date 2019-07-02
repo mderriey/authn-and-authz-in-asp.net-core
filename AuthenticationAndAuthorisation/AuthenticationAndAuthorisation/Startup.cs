@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +11,26 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AuthenticationAndAuthorisation
 {
+    public class AppCookieAuthenticationEvents : CookieAuthenticationEvents
+    {
+        private readonly ISystemClock _clock;
+
+        public AppCookieAuthenticationEvents(ISystemClock clock)
+        {
+            _clock = clock;
+        }
+
+        public override Task ValidatePrincipal(CookieValidatePrincipalContext context)
+        {
+            if (_clock.UtcNow.Second > 30)
+            {
+                context.RejectPrincipal();
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -31,16 +52,10 @@ namespace AuthenticationAndAuthorisation
                     options.Cookie.Expiration = TimeSpan.FromDays(10);
                     options.SlidingExpiration = true;
 
-                    options.Events.OnValidatePrincipal = (CookieValidatePrincipalContext context) =>
-                    {
-                        var loggedInUser = context.Principal;
-
-                        // Check in the database whether the user can still access the application
-                        // if not, call context.RejectPrincipal()
-
-                        return Task.CompletedTask;
-                    };
+                    options.EventsType = typeof(AppCookieAuthenticationEvents);
                 });
+
+            services.AddTransient<AppCookieAuthenticationEvents>();
 
             services
                 .AddMvc()
