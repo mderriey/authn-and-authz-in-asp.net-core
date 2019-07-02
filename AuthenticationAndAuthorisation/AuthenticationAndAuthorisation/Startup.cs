@@ -18,8 +18,13 @@ namespace AuthenticationAndAuthorisation
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddAuthentication("Cookies")
-                .AddCookie("Cookies");
+                .AddAuthentication(options =>
+                {
+                    options.DefaultScheme = "Cookies";
+                    options.DefaultChallengeScheme = "AzureAd";
+                })
+                .AddCookie("Cookies")
+                .AddOpenIdConnect("AzureAd", options => { });
 
             services
                 .AddMvc()
