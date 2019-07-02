@@ -1,0 +1,12 @@
+﻿@using Microsoft.AspNetCore.Authentication
+@model IEnumerable<AuthenticationScheme>
+
+@foreach (var authenticationScheme in Model)
+{
+    <div>
+        <form asp-action="Login" method="post">
+            <input type="hidden" name="scheme" value="@authenticationScheme.Name">
+            <button type="submit" class="btn btn-primary">Log in with @authenticationScheme.DisplayName</button>
+        </form>
+    </div>
+}

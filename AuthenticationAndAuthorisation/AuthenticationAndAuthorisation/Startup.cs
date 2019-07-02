@@ -22,14 +22,12 @@ namespace AuthenticationAndAuthorisation
                 .AddAuthentication("Cookies")
                 .AddCookie("Cookies", options =>
                 {
-                    options.ForwardDefaultSelector = (HttpContext context) =>
-                    {
-                        return context.Request.Path.StartsWithSegments(new PathString("/api"))
-                            ? "JWT"
-                            : null;
-                    };
+                    options.LoginPath = new PathString("/login");
                 })
-                .AddJwtBearer("JWT", options => { });
+                .AddFacebook("Facebook", displayName: "Facebook", options => { })
+                .AddTwitter("Twitter", displayName: "Twitter", options => { })
+                .AddMicrosoftAccount("MicrosoftAccount", displayName: "Microsoft account", options => { })
+                .AddGoogle("Google", displayName: "Google", options => { });
 
             services
                 .AddMvc()
