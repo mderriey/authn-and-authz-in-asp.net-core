@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,8 +18,8 @@ namespace AuthenticationAndAuthorisation
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
+                .AddAuthentication("Cookies")
+                .AddCookie("Cookies");
 
             services
                 .AddMvc()
