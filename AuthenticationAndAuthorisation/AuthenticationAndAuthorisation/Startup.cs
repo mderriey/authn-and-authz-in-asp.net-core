@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,13 +19,17 @@ namespace AuthenticationAndAuthorisation
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddAuthentication(options =>
+                .AddAuthentication("Cookies")
+                .AddCookie("Cookies", options =>
                 {
-                    options.DefaultScheme = "Cookies";
-                    options.DefaultChallengeScheme = "AzureAd";
+                    options.ForwardDefaultSelector = (HttpContext context) =>
+                    {
+                        return context.Request.Path.StartsWithSegments(new PathString("/api"))
+                            ? "JWT"
+                            : null;
+                    };
                 })
-                .AddCookie("Cookies")
-                .AddOpenIdConnect("AzureAd", options => { });
+                .AddJwtBearer("JWT", options => { });
 
             services
                 .AddMvc()
