@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +25,22 @@ namespace AuthenticationAndAuthorisation
                 .AddAuthentication("Cookies")
                 .AddCookie("Cookies", options =>
                 {
-                    options.LoginPath = new PathString("/login");
-                })
-                .AddFacebook("Facebook", displayName: "Facebook", options => { })
-                .AddTwitter("Twitter", displayName: "Twitter", options => { })
-                .AddMicrosoftAccount("MicrosoftAccount", displayName: "Microsoft account", options => { })
-                .AddGoogle("Google", displayName: "Google", options => { });
+                    options.LoginPath = new PathString("/Account/Login");
+                    options.AccessDeniedPath = new PathString("/Account/AccessDenied");
+
+                    options.Cookie.Expiration = TimeSpan.FromDays(10);
+                    options.SlidingExpiration = true;
+
+                    options.Events.OnValidatePrincipal = (CookieValidatePrincipalContext context) =>
+                    {
+                        var loggedInUser = context.Principal;
+
+                        // Check in the database whether the user can still access the application
+                        // if not, call context.RejectPrincipal()
+
+                        return Task.CompletedTask;
+                    };
+                });
 
             services
                 .AddMvc()
