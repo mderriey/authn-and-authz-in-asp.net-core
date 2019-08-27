@@ -7,13 +7,12 @@ namespace AuthenticationAndAuthorisation.Controllers
 {
     public class HomeController : Controller
     {
-        [Authorize(Policy = "Admin")]
+        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
 
-        [Authorize(Policy = "Manager")]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
