@@ -1,3 +1,6 @@
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +9,30 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AuthenticationAndAuthorisation
 {
+    public class DemoRequirement : IAuthorizationRequirement
+    {
+    }
+
+    public class DemoRequirementHandler : AuthorizationHandler<DemoRequirement>
+    {
+        private readonly ISystemClock _clock;
+
+        public DemoRequirementHandler(ISystemClock clock)
+        {
+            _clock = clock;
+        }
+
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, DemoRequirement requirement)
+        {
+            if (_clock.UtcNow.Second > 30)
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -30,7 +57,8 @@ namespace AuthenticationAndAuthorisation
 
                     options.AddPolicy("Admin", builder => builder
                         .RequireAuthenticatedUser()
-                        .RequireRole("admin"));
+                        .RequireRole("admin")
+                        .AddRequirements(new DemoRequirement()));
                 });
 
             services
